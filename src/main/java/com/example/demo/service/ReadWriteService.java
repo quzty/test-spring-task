@@ -43,44 +43,49 @@ public class ReadWriteService {
         exec.shutdown();
     }
 
-    public void write(WriteDTO writeDTO) throws ExecutionException, InterruptedException {
-        CompletionService<String> completionService = new ExecutorCompletionService<>(exec);
-
-        for (int i=0; i < writeDTO.getRepeatTimes(); i++) {
-            int index = i;
-
-            completionService.submit(() -> {
-                try {
-                    if (writeDTO.getDelay() != 0 && index != writeDTO.getRepeatTimes() - 1) {
-                        Thread.sleep(writeDTO.getDelay());
+    public void write(WriteDTO writeDTO) {
+            exec.submit(() -> {
+                for (int i=0; i < writeDTO.getRepeatTimes(); i++) {
+                    try {
+                        System.out.println(writeDTO.getText());
+                        if (writeDTO.getDelay() != 0 && i != writeDTO.getRepeatTimes() - 1) {
+                            Thread.sleep(writeDTO.getDelay());
+                        }
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
                     }
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
+
                 }
-                return writeDTO.getText();
             });
 
-        }
-
-        for (int i=0; i < writeDTO.getRepeatTimes(); i++) {
-            System.out.println(completionService.take().get() + " Thread = " + Thread.currentThread().getName());
-        }
 
         ReadDTO readDTO = new ReadDTO();
         readDTO.setText(writeDTO.getText());
         readDTO.setRepeatTimes(writeDTO.getRepeatTimes());
 
         map.put(writeDTO.getUserName(), readDTO);
-    }
 
-    //            exec.submit(() -> {
+        //        CompletionService<String> completionService = new ExecutorCompletionService<>(exec);
+//
+//        for (int i=0; i < writeDTO.getRepeatTimes(); i++) {
+//            int index = i;
+//
+//            completionService.submit(() -> {
 //                try {
-//                    System.out.println(writeDTO.getText());
 //                    if (writeDTO.getDelay() != 0 && index != writeDTO.getRepeatTimes() - 1) {
 //                        Thread.sleep(writeDTO.getDelay());
 //                    }
 //                } catch (InterruptedException e) {
 //                    throw new RuntimeException(e);
 //                }
+//                return writeDTO.getText();
 //            });
+//
+//        }
+//
+//        for (int i=0; i < writeDTO.getRepeatTimes(); i++) {
+//            System.out.println(completionService.take().get() + " Thread = " +  Thread.currentThread().getName());
+//        }
+    }
+
 }
