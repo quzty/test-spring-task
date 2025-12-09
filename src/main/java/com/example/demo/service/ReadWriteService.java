@@ -33,8 +33,6 @@ public class ReadWriteService {
     }
 
     public void readAllUsers() {
-        ExecutorService exec = Executors.newFixedThreadPool(numberOfThreads);
-
         map.forEach((key, value) ->
                 exec.submit(() ->
                         System.out.println("User = " + key
