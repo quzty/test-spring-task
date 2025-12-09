@@ -48,19 +48,21 @@ public class ReadWriteService {
     public void write(WriteDTO writeDTO) throws ExecutionException, InterruptedException {
         CompletionService<String> completionService = new ExecutorCompletionService<>(exec);
 
-        completionService.submit(() -> {
-            for (int i=0; i < writeDTO.getRepeatTimes(); i++) {
+        for (int i=0; i < writeDTO.getRepeatTimes(); i++) {
+            int index = i;
+
+            completionService.submit(() -> {
                 try {
-                    if (writeDTO.getDelay() != 0 && i != writeDTO.getRepeatTimes() - 1) {
+                    if (writeDTO.getDelay() != 0 && index != writeDTO.getRepeatTimes() - 1) {
                         Thread.sleep(writeDTO.getDelay());
                     }
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
+                return writeDTO.getText();
+            });
 
-            }
-            return writeDTO.getText();
-        });
+        }
 
         for (int i=0; i < writeDTO.getRepeatTimes(); i++) {
             System.out.println(completionService.take().get() + " Thread = " + Thread.currentThread().getName());
