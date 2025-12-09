@@ -6,5 +6,4 @@ import lombok.Data;
 public class ReadDTO {
     private String text;
     private Integer repeatTimes;
-    private Long delay;
 }

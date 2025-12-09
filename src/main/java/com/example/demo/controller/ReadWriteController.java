@@ -23,8 +23,7 @@ public class ReadWriteController {
 
     @PostMapping(value = "/write")
     public ResponseEntity<Void> write(@RequestBody WriteDTO writeDTO) throws ExecutionException, InterruptedException {
-        readWriteService.write(writeDTO);
-        return ResponseEntity.ok().build();
+        return readWriteService.write(writeDTO);
     }
 
     @GetMapping(value = "/read")

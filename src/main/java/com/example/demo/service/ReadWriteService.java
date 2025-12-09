@@ -1,8 +1,11 @@
 package com.example.demo.service;
 
+import com.example.demo.config.AppConfig;
 import com.example.demo.dto.ReadDTO;
 import com.example.demo.dto.WriteDTO;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -12,16 +15,27 @@ import java.util.concurrent.*;
 
 @Service
 public class ReadWriteService {
-    @Value("${app.threads}")
-    private int numberOfThreads;
-    private  ExecutorService exec;
-    private  Map<String, ReadDTO> map;
 
-    @PostConstruct
-    public void initialize() {
-        this.exec = Executors.newFixedThreadPool(numberOfThreads);
+    private final AppConfig appConfig;
+    private final ExecutorService exec;
+    private Map<String, ReadDTO> map;
+
+    @Autowired
+    public ReadWriteService(AppConfig appConfig) {
+        this.appConfig = appConfig;
+        this.exec = Executors.newFixedThreadPool(appConfig.getNumberOfThreads());
         this.map = new HashMap<>();
     }
+//    @Value("${app.threads}")
+//    private int numberOfThreads;
+//    private  ExecutorService exec;
+//    private  Map<String, ReadDTO> map;
+//
+//    @PostConstruct
+//    public void initialize() {
+//        this.exec = Executors.newFixedThreadPool(numberOfThreads);
+//        this.map = new HashMap<>();
+//    }
 
 
     public void readSingleUser(String userName) {
@@ -43,27 +57,29 @@ public class ReadWriteService {
         exec.shutdown();
     }
 
-    public void write(WriteDTO writeDTO) {
-            exec.submit(() -> {
-                for (int i=0; i < writeDTO.getRepeatTimes(); i++) {
-                    try {
-                        System.out.println(writeDTO.getText() + " Thread Name = " + Thread.currentThread().getName());
-                        if (writeDTO.getDelay() != 0 && i != writeDTO.getRepeatTimes() - 1) {
-                            Thread.sleep(writeDTO.getDelay());
-                        }
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
+    public ResponseEntity<Void> write(WriteDTO writeDTO) {
+        exec.submit(() -> {
+            for (int i=0; i < writeDTO.getRepeatTimes(); i++) {
+                try {
+                    System.out.println(writeDTO.getText()
+                            + " Thread Name = " + Thread.currentThread().getName());
+                    if (writeDTO.getDelay() != 0
+                            && i != writeDTO.getRepeatTimes() - 1) {
+                        Thread.sleep(writeDTO.getDelay());
                     }
-
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
                 }
-            });
-
+            }
+        });
 
         ReadDTO readDTO = new ReadDTO();
         readDTO.setText(writeDTO.getText());
         readDTO.setRepeatTimes(writeDTO.getRepeatTimes());
 
         map.put(writeDTO.getUserName(), readDTO);
+
+        return ResponseEntity.ok().build();
 
         //        CompletionService<String> completionService = new ExecutorCompletionService<>(exec);
 //
