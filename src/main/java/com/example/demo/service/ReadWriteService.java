@@ -47,7 +47,7 @@ public class ReadWriteService {
             exec.submit(() -> {
                 for (int i=0; i < writeDTO.getRepeatTimes(); i++) {
                     try {
-                        System.out.println(writeDTO.getText());
+                        System.out.println(writeDTO.getText() + " Thread Name = " + Thread.currentThread().getName());
                         if (writeDTO.getDelay() != 0 && i != writeDTO.getRepeatTimes() - 1) {
                             Thread.sleep(writeDTO.getDelay());
                         }
